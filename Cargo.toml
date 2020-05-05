@@ -1,0 +1,8 @@
+[package]
+name = "acedia_code_gen"
+version = "0.1.0"
+authors = ["Anton Tarasenko <sunakdb@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+csv = "1.1"
