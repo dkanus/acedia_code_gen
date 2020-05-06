@@ -67,6 +67,16 @@ fn get_data_reader(config: &Config) -> Result<csv::Reader<File>, Box<dyn Error>>
         .from_reader(data_file))
 }
 
+#[cfg(target_os = "windows")]
+fn get_new_line_sequence() -> String {
+    String::from("\r\n")
+}
+
+#[cfg(not(target_os = "windows"))]
+fn get_new_line_sequence() -> String {
+    String::from("\n")
+}
+
 fn generate_uc(config: &Config, mappings: &CaseMappings) -> Result<(), Box<dyn Error>> {
     let template_path = &config.template_path;
     let uc_path = env::current_dir()?;
@@ -74,30 +84,31 @@ fn generate_uc(config: &Config, mappings: &CaseMappings) -> Result<(), Box<dyn E
     fs::copy(template_path, &uc_path)?;
 
     let uc_file = OpenOptions::new().append(true).open(uc_path)?;
-    writeln!(&uc_file, "defaultproperties")?;
-    writeln!(&uc_file, "{{")?;
+    let new_line = get_new_line_sequence();
+    write!(&uc_file, "defaultproperties{}", new_line)?;
+    write!(&uc_file, "{{{}", new_line)?;
     for (i, mapping) in mappings.to_lower.iter().enumerate() {
-        writeln!(
+        write!(
             &uc_file,
-            "    to_lower({})=(from=0x{:x},to=0x{:x})",
-            i, mapping.from, mapping.to
+            "    to_lower({})=(from=0x{:x},to=0x{:x}){}",
+            i, mapping.from, mapping.to, new_line
         )?;
     }
     for (i, mapping) in mappings.to_upper.iter().enumerate() {
-        writeln!(
+        write!(
             &uc_file,
-            "    to_upper({})=(from=0x{:x},to=0x{:x})",
-            i, mapping.from, mapping.to
+            "    to_upper({})=(from=0x{:x},to=0x{:x}){}",
+            i, mapping.from, mapping.to, new_line
         )?;
     }
     for (i, mapping) in mappings.to_title.iter().enumerate() {
-        writeln!(
+        write!(
             &uc_file,
-            "    to_title({})=(from=0x{:x},to=0x{:x})",
-            i, mapping.from, mapping.to
+            "    to_title({})=(from=0x{:x},to=0x{:x}){}",
+            i, mapping.from, mapping.to, new_line
         )?;
     }
-    writeln!(&uc_file, "}}")?;
+    write!(&uc_file, "}}{}", new_line)?;
     Ok(())
 }
 
