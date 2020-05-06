@@ -110,5 +110,5 @@ pub fn run(config: &Config) {
             .read_mappings(record)
             .expect("Provided Unicode data file has incorrect csv format");
     }
-    generate_uc(config, &mappings).expect("Issues with writing into file \"UnicodeData.uc\"");
+    generate_uc(config, &mappings).expect(r#"Issues with writing into file "UnicodeData.uc""#);
 }
