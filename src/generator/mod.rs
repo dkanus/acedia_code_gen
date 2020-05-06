@@ -13,8 +13,8 @@ const TITLECASE_MAPPING_INDEX: usize = 14;
 const UC_OUTPUT_NAME: &str = "UnicodeData.uc";
 
 struct CodePointMapping {
-    from: i32,
-    to: i32,
+    from: u32,
+    to: u32,
 }
 
 struct CaseMappings {
@@ -33,23 +33,23 @@ impl CaseMappings {
     }
 
     fn read_mappings(&mut self, record: csv::StringRecord) -> Result<(), Box<dyn Error>> {
-        let code_point = i32::from_str_radix(&record[0], 16)?;
+        let code_point = u32::from_str_radix(&record[0], 16)?;
         if !record[UPPERCASE_MAPPING_INDEX].is_empty() {
-            let code_point_image = i32::from_str_radix(&record[UPPERCASE_MAPPING_INDEX], 16)?;
+            let code_point_image = u32::from_str_radix(&record[UPPERCASE_MAPPING_INDEX], 16)?;
             self.to_upper.push(CodePointMapping {
                 from: code_point,
                 to: code_point_image,
             });
         }
         if !record[LOWERCASE_MAPPING_INDEX].is_empty() {
-            let code_point_image = i32::from_str_radix(&record[LOWERCASE_MAPPING_INDEX], 16)?;
+            let code_point_image = u32::from_str_radix(&record[LOWERCASE_MAPPING_INDEX], 16)?;
             self.to_lower.push(CodePointMapping {
                 from: code_point,
                 to: code_point_image,
             });
         }
         if !record[TITLECASE_MAPPING_INDEX].is_empty() {
-            let code_point_image = i32::from_str_radix(&record[TITLECASE_MAPPING_INDEX], 16)?;
+            let code_point_image = u32::from_str_radix(&record[TITLECASE_MAPPING_INDEX], 16)?;
             self.to_title.push(CodePointMapping {
                 from: code_point,
                 to: code_point_image,
