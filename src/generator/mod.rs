@@ -1,16 +1,16 @@
 use std::env;
-use std::io::Write;
-use std::fs::{self, File, OpenOptions};
-use std::path::Path;
 use std::error::Error;
+use std::fs::{self, File, OpenOptions};
+use std::io::Write;
+use std::path::Path;
 
 pub mod config;
 pub use config::Config;
 
-const UPPERCASE_MAPPING_INDEX:usize = 12;
-const LOWERCASE_MAPPING_INDEX:usize = 13;
-const TITLECASE_MAPPING_INDEX:usize = 14;
-const UC_OUTPUT_NAME:&str = "UnicodeData.uc";
+const UPPERCASE_MAPPING_INDEX: usize = 12;
+const LOWERCASE_MAPPING_INDEX: usize = 13;
+const TITLECASE_MAPPING_INDEX: usize = 14;
+const UC_OUTPUT_NAME: &str = "UnicodeData.uc";
 
 struct CodePointMapping {
     from: i32,
@@ -25,22 +25,35 @@ struct CaseMappings {
 
 impl CaseMappings {
     fn new() -> CaseMappings {
-        CaseMappings { to_lower: Vec::new(), to_upper: Vec::new(), to_title: Vec::new() }
+        CaseMappings {
+            to_lower: Vec::new(),
+            to_upper: Vec::new(),
+            to_title: Vec::new(),
+        }
     }
 
     fn read_mappings(&mut self, record: csv::StringRecord) -> Result<(), Box<dyn Error>> {
         let code_point = i32::from_str_radix(&record[0], 16)?;
         if !record[UPPERCASE_MAPPING_INDEX].is_empty() {
             let code_point_image = i32::from_str_radix(&record[UPPERCASE_MAPPING_INDEX], 16)?;
-            self.to_upper.push(CodePointMapping { from: code_point, to: code_point_image });
+            self.to_upper.push(CodePointMapping {
+                from: code_point,
+                to: code_point_image,
+            });
         }
         if !record[LOWERCASE_MAPPING_INDEX].is_empty() {
             let code_point_image = i32::from_str_radix(&record[LOWERCASE_MAPPING_INDEX], 16)?;
-            self.to_lower.push(CodePointMapping { from: code_point, to: code_point_image });
+            self.to_lower.push(CodePointMapping {
+                from: code_point,
+                to: code_point_image,
+            });
         }
         if !record[TITLECASE_MAPPING_INDEX].is_empty() {
             let code_point_image = i32::from_str_radix(&record[TITLECASE_MAPPING_INDEX], 16)?;
-            self.to_title.push(CodePointMapping { from: code_point, to: code_point_image });
+            self.to_title.push(CodePointMapping {
+                from: code_point,
+                to: code_point_image,
+            });
         }
         Ok(())
     }
@@ -60,19 +73,29 @@ fn generate_uc(config: &Config, mappings: &CaseMappings) -> Result<(), Box<dyn E
     let uc_path = uc_path.join(&Path::new(UC_OUTPUT_NAME));
     fs::copy(template_path, &uc_path)?;
 
-    let uc_file = OpenOptions::new()
-        .append(true)
-        .open(uc_path)?;
+    let uc_file = OpenOptions::new().append(true).open(uc_path)?;
     writeln!(&uc_file, "defaultproperties")?;
     writeln!(&uc_file, "{{")?;
     for (i, mapping) in mappings.to_lower.iter().enumerate() {
-        writeln!(&uc_file, "    to_lower({})=(from=0x{:x},to=0x{:x})", i, mapping.from, mapping.to)?;
+        writeln!(
+            &uc_file,
+            "    to_lower({})=(from=0x{:x},to=0x{:x})",
+            i, mapping.from, mapping.to
+        )?;
     }
     for (i, mapping) in mappings.to_upper.iter().enumerate() {
-        writeln!(&uc_file, "    to_upper({})=(from=0x{:x},to=0x{:x})", i, mapping.from, mapping.to)?;
+        writeln!(
+            &uc_file,
+            "    to_upper({})=(from=0x{:x},to=0x{:x})",
+            i, mapping.from, mapping.to
+        )?;
     }
     for (i, mapping) in mappings.to_title.iter().enumerate() {
-        writeln!(&uc_file, "    to_title({})=(from=0x{:x},to=0x{:x})", i, mapping.from, mapping.to)?;
+        writeln!(
+            &uc_file,
+            "    to_title({})=(from=0x{:x},to=0x{:x})",
+            i, mapping.from, mapping.to
+        )?;
     }
     writeln!(&uc_file, "}}")?;
     Ok(())

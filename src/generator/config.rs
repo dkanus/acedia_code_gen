@@ -1,5 +1,5 @@
-const DEFAULT_UNICODE_DATA_PATH:&str = "UnicodeData.txt";
-const DEFAULT_TEMPLATE_PATH:&str = "template.uc";
+const DEFAULT_UNICODE_DATA_PATH: &str = "UnicodeData.txt";
+const DEFAULT_TEMPLATE_PATH: &str = "template.uc";
 
 pub struct Config {
     pub unicode_data_path: String,
@@ -7,8 +7,7 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn new (arguments: Vec<String>) -> Config {
-
+    pub fn new(arguments: Vec<String>) -> Config {
         Config {
             unicode_data_path: arguments
                 .get(1)
