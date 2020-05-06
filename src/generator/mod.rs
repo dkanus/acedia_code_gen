@@ -102,22 +102,13 @@ fn generate_uc(config: &Config, mappings: &CaseMappings) -> Result<(), Box<dyn E
 }
 
 pub fn run(config: &Config) {
-    let mut data_reader = match get_data_reader(config) {
-        Ok(reader) => reader,
-        Err(_) => panic!("Cannot open file with unicode data"),
-    };
+    let mut data_reader = get_data_reader(config).expect("Cannot open file with unicode data");
     let mut mappings = CaseMappings::new();
     for result in data_reader.records() {
-        let record;
-        match result {
-            Ok(parsed_record) => record = parsed_record,
-            Err(_) => panic!("Provided Unicode data file has incorrect csv format"),
-        }
-        if let Err(_) = mappings.read_mappings(record) {
-            panic!("Provided Unicode data file has incorrect csv format");
-        }
+        let record = result.expect("Provided Unicode data file has incorrect csv format");
+        mappings
+            .read_mappings(record)
+            .expect("Provided Unicode data file has incorrect csv format");
     }
-    if let Err(_) = generate_uc(config, &mappings) {
-        panic!("Issues with writing into file \"UnicodeData.uc\"");
-    }
+    generate_uc(config, &mappings).expect("Issues with writing into file \"UnicodeData.uc\"");
 }
